@@ -1,9 +1,9 @@
+import os
+from dotenv import load_dotenv
 import requests
-
+load_dotenv()
 # Replace with your OpenWeatherMap API Key
-API_KEY = "99310b19610c93ff87d95d8f0569d995"
-
-
+API_KEY = os.getenv("API_KEY")
 # =========================
 # Current Weather
 # =========================
