@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Real-Time Weather Data Analytics and Smart Monitoring System</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+
+        <h1>
+            🌦 Real-Time Weather Analytics Dashboard
+        </h1>
+
+        <button id="themeBtn">
+            🌙 Dark Mode
+        </button>
+
+    </div>
+
+    <!-- Search -->
+
+    <div class="search-box">
+
+        <form method="GET">
+
+            <input
+            type="text"
+            name="city"
+            placeholder="Search City..."
+            value="{{ city }}"
+            required>
+
+            <button type="submit">
+                Search
+            </button>
+
+        </form>
+
+    </div>
+
+    {% if weather %}
+
+    <div class="city-section">
+
+        <h2>
+            📍 {{ weather.city }}
+        </h2>
+
+        <img
+        src="https://openweathermap.org/img/wn/{{ weather.icon }}@2x.png"
+        alt="Weather Icon">
+
+        <p>
+            {{ weather.description }}
+        </p>
+
+    </div>
+
+    {% endif %}
+
+    <div class="alert">
+
+        {{ alert }}
+
+    </div>
+
+    <!-- Weather Cards -->
+
+    <div class="weather-cards">
+
+        <div class="card">
+            <h3>🌡 Temperature</h3>
+            <p>{{ weather.temperature }} °C</p>
+        </div>
+
+        <div class="card">
+            <h3>💧 Humidity</h3>
+            <p>{{ weather.humidity }} %</p>
+        </div>
+
+        <div class="card">
+            <h3>📊 Pressure</h3>
+            <p>{{ weather.pressure }} hPa</p>
+        </div>
+
+        <div class="card">
+            <h3>🌪 Wind Speed</h3>
+            <p>{{ weather.wind_speed }} m/s</p>
+        </div>
+
+        <div class="card">
+            <h3>🌧 Rainfall</h3>
+            <p>{{ weather.rainfall }}</p>
+        </div>
+
+    </div>
+
+    <!-- AQI -->
+
+    <h2>🌍 Air Quality Index</h2>
+
+    <div class="aqi-card">
+
+        <h3>AQI Level</h3>
+
+        <p>{{ aqi }}</p>
+
+        <small>
+
+            1 = Good
+
+            |
+
+            2 = Fair
+
+            |
+
+            3 = Moderate
+
+            |
+
+            4 = Poor
+
+            |
+
+            5 = Very Poor
+
+        </small>
+
+    </div>
+<!-- Global Weather Monitor -->
+
+<h2>🌍 Global Weather Monitor</h2>
+
+<div class="global-weather">
+
+    {% for item in global_weather %}
+
+    <div class="global-card">
+
+        <h3>{{ item.city }}</h3>
+
+        <img
+        src="https://openweathermap.org/img/wn/{{ item.icon }}@2x.png"
+        alt="Weather Icon">
+
+        <p>{{ item.temperature }} °C</p>
+
+        <small>
+            Humidity: {{ item.humidity }} %
+        </small>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+    <!-- Forecast -->
+
+    <h2>📅 Weather Forecast</h2>
+
+    <div class="forecast-container">
+
+        {% for day in forecast %}
+
+        <div class="forecast-card">
+
+            <h4>{{ day.date }}</h4>
+
+            <img
+            src="https://openweathermap.org/img/wn/{{ day.icon }}@2x.png">
+
+            <p>{{ day.temp }} °C</p>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    <!-- Analytics -->
+
+    <h2>📊 Analytics Summary</h2>
+
+    <div class="analytics">
+
+        <div class="analytics-card">
+            <h3>Average Temp</h3>
+            <p>{{ analytics.avg_temp }}</p>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Max Temp</h3>
+            <p>{{ analytics.max_temp }}</p>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Min Temp</h3>
+            <p>{{ analytics.min_temp }}</p>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Avg Humidity</h3>
+            <p>{{ analytics.avg_humidity }}</p>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Avg Rainfall</h3>
+            <p>{{ analytics.avg_rainfall }}</p>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Max Wind</h3>
+            <p>{{ analytics.max_wind }}</p>
+        </div>
+
+    </div>
+
+    <!-- Export -->
+
+    <div class="download-section">
+
+        <a href="/export">
+
+            <button class="download-btn">
+
+                Download CSV Report
+
+            </button>
+
+        </a>
+
+    </div>
+
+    <!-- Charts -->
+
+    <h2>📈 Temperature Trend</h2>
+
+    <canvas id="tempChart"></canvas>
+
+    <h2>💧 Humidity Trend</h2>
+
+    <canvas id="humidityChart"></canvas>
+
+    <h2>🌧 Rainfall Trend</h2>
+
+    <canvas id="rainChart"></canvas>
+
+    <!-- Table -->
+
+    <h2>📋 Recent Records</h2>
+
+    <table>
+
+        <tr>
+
+            <th>ID</th>
+            <th>Time</th>
+            <th>Temp</th>
+            <th>Humidity</th>
+            <th>Pressure</th>
+            <th>Wind</th>
+            <th>Rainfall</th>
+
+        </tr>
+
+        {% for row in history %}
+
+        <tr>
+
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
+            <td>{{ row[5] }}</td>
+            <td>{{ row[6] }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+</div>
+
+<script>
+
+const tempData =
+{{ chart_data.temperature | tojson }};
+
+const humidityData =
+{{ chart_data.humidity | tojson }};
+
+const rainfallData =
+{{ chart_data.rainfall | tojson }};
+
+const labels =
+tempData.map((_, index) => index + 1);
+
+
+/* Temperature */
+
+new Chart(
+document.getElementById("tempChart"),
+{
+    type:"line",
+
+    data:{
+
+        labels:labels,
+
+        datasets:[{
+
+            label:"Temperature",
+
+            data:tempData,
+
+            borderWidth:3
+        }]
+    }
+});
+
+
+/* Humidity */
+
+new Chart(
+document.getElementById("humidityChart"),
+{
+    type:"bar",
+
+    data:{
+
+        labels:labels,
+
+        datasets:[{
+
+            label:"Humidity",
+
+            data:humidityData
+        }]
+    }
+});
+
+
+/* Rainfall */
+
+new Chart(
+document.getElementById("rainChart"),
+{
+    type:"line",
+
+    data:{
+
+        labels:labels,
+
+        datasets:[{
+
+            label:"Rainfall",
+
+            data:rainfallData,
+
+            borderWidth:3
+        }]
+    }
+});
+
+
+/* Dark Mode */
+
+const btn =
+document.getElementById("themeBtn");
+
+btn.onclick = () => {
+
+    document.body.classList.toggle("dark");
+
+    if(document.body.classList.contains("dark"))
+    {
+        btn.innerHTML =
+        "☀️ Light Mode";
+    }
+
+    else
+    {
+        btn.innerHTML =
+        "🌙 Dark Mode";
+    }
+
+};
+
+</script>
+
+</body>
+</html>
